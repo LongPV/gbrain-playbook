@@ -17,3 +17,10 @@ about people, companies, decisions, projects, or past context:
    (entity pages under people/, companies/; decisions under decisions/ or
    notes/). One insight, one page, linked.
 3. **Cite.** When you answer from the brain, name the page you used.
+
+## Rules
+
+Project rules live in [`agent-rules/`](agent-rules/) and are binding. Read
+them before acting in this repo.
+
+- [Never run `gbrain upgrade`](agent-rules/no-gbrain-upgrade.md)
