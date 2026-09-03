@@ -20,7 +20,7 @@ about people, companies, decisions, projects, or past context:
 
 ## Rules
 
-Project rules live in [`agent-rules/`](agent-rules/) and are binding. Read
+Project rules live in [`.agents/rules/`](.agents/rules/) and are binding. Read
 them before acting in this repo.
 
-- [Never run `gbrain upgrade`](agent-rules/no-gbrain-upgrade.md)
+- [Never run `gbrain upgrade`](.agents/rules/no-gbrain-upgrade.md)
