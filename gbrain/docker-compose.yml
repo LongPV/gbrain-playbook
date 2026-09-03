@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: gbrain_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gbrain
+      POSTGRES_PASSWORD: gbrainpgpassword
+      POSTGRES_DB: gbrain
+    ports:
+      - "5432:5432"
+    volumes:
+      - gbrain_db_data:/var/lib/postgresql/data
+
+volumes:
+  gbrain_db_data:
