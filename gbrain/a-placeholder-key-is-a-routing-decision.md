@@ -10,21 +10,42 @@ models.dream.extract_atoms  → openai:gpt-5.6-luna  [tier.utility (caller-speci
 
 Nothing I configured asked for that. I found it on gbrain 0.48.2.0, and the
 path from "a string I typed during setup" to "a phase of my brain routes to a
-provider I can't pay for" turned out to be four hops long, every one of them
+provider I can't pay for" turned out to be five hops long, every one of them
 individually reasonable.
 
 ## The chain
 
-My `~/.gbrain/config.json` carries this line:
+My `~/.gbrain/config.json` carried this line:
 
 ```json
 "openai_api_key": "sk-dummy"
 ```
 
-I put it there — or something did, during setup — to get past a check. It is
-not a credential. It is the shape of a credential.
+I typed `sk-dummy` during setup to get past a check. Note what I did *not* do:
+I never said the word OpenAI. The setup interview decided that, by looking at
+the string's shape:
 
-`mergedProviderEnv` folds config-file keys into the environment, so
+```ts
+/** Provider detection by key shape. Order matters: `sk-ant-` before `sk-`. */
+const PROVIDER_KEY_SHAPES = [
+  { prefix: 'sk-ant-', configKey: 'anthropic_api_key', label: 'Anthropic (sk-ant-…)' },
+  { prefix: 'sk-',     configKey: 'openai_api_key',    label: 'OpenAI (sk-…)' },
+  { prefix: 'pa-',     configKey: 'voyage_api_key',    label: 'Voyage (pa-…)' },
+];
+```
+
+`sk-dummy` begins with `sk-`, so it was filed as an OpenAI credential. The
+convenience is obvious and, for real keys, entirely correct — vendors do use
+distinguishable prefixes, and asking "which provider is this?" after someone
+has already pasted a key that announces it is a needless question. But the
+prefix is the *only* evidence consulted. A placeholder that happens to start
+with `sk-` is not a fake OpenAI key; it becomes one, at the moment it is
+classified.
+
+It is not a credential. It is the shape of a credential — and shape is
+precisely what the code dispatches on.
+
+`mergedProviderEnv` then folds config-file keys into the environment, so
 `openai_api_key` becomes `OPENAI_API_KEY` for everything downstream. That's a
 good design: it means a launchd job or an MCP server with an empty environment
 still sees the keys you configured in a file, and the source comments show
@@ -123,9 +144,24 @@ Deleting `sk-dummy` does **not** fix this, and that's worth sitting with. With
 no provider key present at all, `resolveTierDefault` returns the hardcoded
 `TIER_DEFAULTS.utility` — `anthropic:claude-haiku-4-5-20251001` — which needs
 an Anthropic API key I also don't have. I'd trade an unusable OpenAI pin for an
-unusable Anthropic one. The placeholder is still worth removing, because it
-biases every other call site that ends in `?? resolveTierDefault('utility')`,
-but removing it is hygiene, not the repair.
+unusable Anthropic one.
+
+I removed it anyway, and the reason turned out to be better than hygiene.
+`facts/classify.ts` gates on `isAvailable('chat', model)` before calling its
+classifier, and that gate also tests key *presence*. With `sk-dummy` in place
+the gate passed, the call was attempted, the call failed, and the `catch`
+degraded to a cosine-similarity fallback — every time, forever, with a wasted
+round trip on each. With no key at all the gate short-circuits correctly. The
+outcome is the same degraded path; the difference is that the system now
+declines honestly instead of failing and recovering. A check that returns the
+right answer for the wrong reason is a check waiting to return the wrong one.
+
+(One thing to verify before deleting a key like this: the credential may exist
+in more than one place. gbrain's `DB_MERGED_PROVIDER_KEY_FIELDS` fills provider
+keys in from the Postgres plane whenever file and env are both silent, so a
+stray DB copy would have silently restored the value the moment I removed the
+file one. Mine had none — but "I deleted it" and "it is gone" are different
+claims in any system with a merged config.)
 
 ## The deeper shape
 
@@ -148,11 +184,26 @@ convenient proxy for the capability. Presence of a key is a decent proxy for
 valid) or a subscription (valid, not present). Both ends of the proxy fail,
 and they fail in opposite directions.
 
-The same proxy shows up one layer down, too. `providerKeyReady` checks that
-every required env var is *set*; `isAvailable('chat', model)` gates on that.
-So in `facts/classify.ts`, a dummy key passes the availability gate, the call
-is attempted, the call fails, and the `catch` degrades to a cosine-similarity
-fallback. No error surfaces. The system works, slightly worse, forever.
+What makes this more than one bad check is that the whole path is proxies, and
+they compose. Look at what each hop actually consulted:
+
+| Question | Evidence used |
+|---|---|
+| Which provider is this key for? | the string's first three characters |
+| Do I have an account with that provider? | is the variable non-empty |
+| Can this model serve a request? | same presence check, one layer down |
+
+Not one of those ever asks whether the credential works. Each is a reasonable
+local shortcut, and each is *load-bearing input to the next* — so a string that
+was never a credential becomes an OpenAI key, which becomes a funded account,
+which becomes a usable model. Nothing lied. Every step faithfully reported the
+answer to a question that was standing in for the one that mattered.
+
+The proxy shows up a third time at the bottom, where it costs the least and is
+easiest to miss: `providerKeyReady` checks that every required env var is set,
+`isAvailable('chat', model)` gates on that, and a dummy key sails through to a
+call that fails into a silent fallback. The system works, slightly worse,
+forever.
 
 ## What this generalizes to
 
@@ -164,6 +215,16 @@ one validator, and validators don't stay put — they get folded into env maps
 and read by resolvers that were written years apart. Either verify usability at
 the point where it matters, or refuse recognizable sentinels outright, but do
 not let "a string is present" mean "an account exists."
+
+**Identity inferred from format is a guess that hardens into a fact.** Routing
+a key to a provider by its prefix is a nice affordance — it saves a question
+whose answer is usually sitting right there in the string. But the guess is
+made once, at the noisiest moment in the whole system (setup, where people
+paste placeholders, test values and the wrong key entirely), and thereafter it
+is stored as though it were something the user asserted. By the time anything
+downstream reads `openai_api_key`, the inference is indistinguishable from a
+declaration. If you must infer, keep a record that you inferred — and be most
+suspicious of format-matching exactly where the format is cheapest to imitate.
 
 **Report provenance, not just values.** A config dump that shows what resolved
 is a fraction as useful as one that shows *why* it resolved. Every row in my
@@ -197,6 +258,7 @@ misconfiguration invisible, and you generally get to pick only one.
 ---
 
 *Verified on gbrain 0.48.2.0. Source references —
-`src/core/ai/provider-env.ts`, `src/core/model-config.ts`,
-`src/core/cycle/extract-atoms.ts`, `src/commands/models.ts`,
+`src/core/bootstrap/interview.ts`, `src/core/ai/provider-env.ts`,
+`src/core/model-config.ts`, `src/core/cycle/extract-atoms.ts`,
+`src/commands/models.ts`, `src/core/config-db-merge.ts`,
 `src/core/facts/classify.ts` — point into the gbrain clone, not this repo.*
