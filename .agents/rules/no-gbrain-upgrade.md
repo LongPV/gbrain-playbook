@@ -16,7 +16,7 @@ commits stops being fast-forwardable once upstream moves.
 ## Instead
 
 The user pulls the clone themselves. Once they have, run the
-[/upgrade-gbrain](../.claude/commands/upgrade-gbrain.md) slash command: it
+[/upgrade-gbrain](../../.claude/commands/upgrade-gbrain.md) slash command: it
 installs dependencies, applies migrations, and surfaces the migration notes —
 everything the upgrade would have done after the pull.
 

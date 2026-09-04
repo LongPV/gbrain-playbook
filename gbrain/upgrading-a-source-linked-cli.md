@@ -37,7 +37,7 @@ So `gbrain upgrade` is off the table — not because it is broken, but because
 its first action is the one action I reserved for myself.
 
 That prohibition is now written down as a rule of its own —
-[agent-rules/no-gbrain-upgrade.md](../agent-rules/no-gbrain-upgrade.md) —
+[.agents/rules/no-gbrain-upgrade.md](../.agents/rules/no-gbrain-upgrade.md) —
 linked from `AGENTS.md` and `CLAUDE.md`, the files an agent reads before
 touching this repo. The rule states what not to run, why, and what to do
 instead, placed where an agent meets it before it can be helpfully wrong.
