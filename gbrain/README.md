@@ -12,3 +12,6 @@ day to day. One write-up per file.
   take on when you fork a tool instead of configuring it
 - [A placeholder key is a routing decision](a-placeholder-key-is-a-routing-decision.md) — a
   fake API key typed to pass setup validation elects a provider you can't pay for
+- [Two files configure a brain repo](two-files-configure-a-brain-repo.md) — `gbrain.yml`
+  declares storage tiers, `.gitignore` quietly decides what gets indexed, and
+  the third file you'd reach for doesn't exist
