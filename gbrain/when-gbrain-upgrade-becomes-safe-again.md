@@ -91,7 +91,7 @@ The first two lines to expect:
 
 ```
 Detected install method: bun-link
-Upgrading bun-link source clone at /Users/photon/gbrain...
+Upgrading bun-link source clone at ~/gbrain...
 ```
 
 From there it runs `git pull --ff-only` and `bun install` in the clone,
@@ -108,7 +108,7 @@ The printed line names how the install was *made* — `git clone` plus
 `bun link` — rather than what the upgrade is about to do. Under `bun-link`
 there is no binary to swap. The git pull *is* the swap: `~/.bun/bin/gbrain`
 resolves through `~/.bun/install/global/node_modules/gbrain` to
-`/Users/photon/gbrain` and runs `src/cli.ts` directly, so new commits *are*
+`~/gbrain` and runs `src/cli.ts` directly, so new commits *are*
 the new version the moment they land.
 
 Detection is thinner than it looks. `detectBunLink()` walks up from `argv[1]`
