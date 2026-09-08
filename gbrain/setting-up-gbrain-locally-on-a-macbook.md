@@ -106,11 +106,13 @@ the config file for you. An existing PGLite brain moves across with
 `gbrain migrate --to supabase --url <postgres url>`; the flag is named for
 the common case but takes any URL.
 
-One caveat about that compose file, which is mine and which I am flagging
-rather than hiding: it publishes `5432:5432`, meaning all interfaces, with a
-password that is committed to a public repo. On a laptop that joins café
-wi-fi that is an open Postgres. `127.0.0.1:5432:5432` binds it to the loopback
-instead and costs nothing, because every client here is local anyway.
+One detail in that compose file is worth stating out loud, because it shipped
+wrong the first time: the host side of the port mapping is
+`127.0.0.1:5432:5432`, not `5432:5432`. The bare form publishes on all
+interfaces, and with a password committed to a public repo, a laptop that
+joins café wi-fi is then serving an open Postgres holding the whole brain.
+Binding to the loopback costs nothing here, because every client — the CLI,
+the `gbrain serve` MCP subprocesses, autopilot — is local anyway.
 
 ## 3. Embeddings: a local model, pinned before the first import
 
