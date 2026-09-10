@@ -84,7 +84,7 @@ thing that makes the topology legal.
 The compose file lives in this repo:
 
 ```bash
-docker compose -f gbrain/docker-compose.yml up -d
+docker compose -f deploy/gbrain-postgres/docker-compose/docker-compose.yml up -d
 ```
 
 `pgvector/pgvector:pg16`, one named volume, one published port. Then point
