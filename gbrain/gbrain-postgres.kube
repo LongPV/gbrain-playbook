@@ -1,6 +1,16 @@
 # Quadlet unit for gbrain-postgres.yaml on a Debian server. Needs Podman >= 4.4
-# (Debian 13 trixie; Debian 12's Podman 4.3 has no Quadlet). Put both files in
-# the same directory, then generate and start the service:
+# (Debian 13 trixie; Debian 12's Podman 4.3 has no Quadlet).
+#
+# First create the Postgres password secret, as the same user (root or not)
+# that will run the service. kube play only reads a secret that is a JSON map
+# or a Kubernetes Secret, not a bare string, hence the wrapper:
+#
+#   read -rs PGPASS   # e.g. the output of: openssl rand -hex 24
+#   printf 'apiVersion: v1\nkind: Secret\nmetadata:\n  name: gbrain-postgres\nstringData:\n  password: "%s"\n' \
+#     "$PGPASS" | podman secret create gbrain-postgres -
+#   unset PGPASS
+#
+# Then put both files in the same directory, generate and start the service:
 #
 #   rootful:  /etc/containers/systemd/
 #             systemctl daemon-reload && systemctl start gbrain-postgres

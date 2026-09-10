@@ -26,8 +26,13 @@ spec:
       env:
         - name: POSTGRES_USER
           value: gbrain
+        # Podman secret `gbrain-postgres`, created before the first start;
+        # see gbrain-postgres.kube. Read only when the volume is initialised.
         - name: POSTGRES_PASSWORD
-          value: gbrainpgpassword
+          valueFrom:
+            secretKeyRef:
+              name: gbrain-postgres
+              key: password
         - name: POSTGRES_DB
           value: gbrain
       ports:
