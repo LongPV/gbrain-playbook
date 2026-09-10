@@ -1,0 +1,44 @@
+# Kubernetes equivalent of docker-compose.yml, for `podman kube play` and the
+# Quadlet unit gbrain-postgres.kube. Podman names the container
+# <pod>-<container>, so it runs as `gbrain-postgres`.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gbrain-db-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gbrain
+  labels:
+    app: gbrain
+spec:
+  restartPolicy: Always
+  containers:
+    - name: postgres
+      image: docker.io/pgvector/pgvector:pg16
+      env:
+        - name: POSTGRES_USER
+          value: gbrain
+        - name: POSTGRES_PASSWORD
+          value: gbrainpgpassword
+        - name: POSTGRES_DB
+          value: gbrain
+      ports:
+        - containerPort: 5432
+          hostIP: 127.0.0.1
+          hostPort: 5432
+          protocol: TCP
+      volumeMounts:
+        - name: gbrain-db-data
+          mountPath: /var/lib/postgresql/data
+  volumes:
+    - name: gbrain-db-data
+      persistentVolumeClaim:
+        claimName: gbrain-db-data
