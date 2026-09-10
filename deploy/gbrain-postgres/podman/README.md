@@ -14,14 +14,17 @@ Runs PostgreSQL 16 with `pgvector` as a systemd-managed service using Podman Qua
 `podman kube play` expects secrets structured as Kubernetes Secrets or JSON maps rather than plain strings. Create the `gbrain-postgres` secret as the user running the service:
 
 ```bash
-# Generate or supply your database password
+# 1. Generate or supply your database password
 read -rs PGPASS   # or: PGPASS=$(openssl rand -hex 24)
 
-# Create the secret in Podman
+# 2. Create the secret in Podman
 printf 'apiVersion: v1\nkind: Secret\nmetadata:\n  name: gbrain-postgres\nstringData:\n  password: "%s"\n' \
   "$PGPASS" | podman secret create gbrain-postgres -
 
-# Clear the shell variable
+# 3. Configure GBrain connection URL
+export GBRAIN_DATABASE_URL="postgresql://gbrain:${PGPASS}@127.0.0.1:5432/gbrain"
+
+# 4. Clear the shell variable
 unset PGPASS
 ```
 
@@ -96,6 +99,5 @@ podman kube down gbrain-postgres.yaml
 Once running on `127.0.0.1:5432`:
 
 ```bash
-export GBRAIN_DATABASE_URL=postgresql://gbrain:<password>@localhost:5432/gbrain
 gbrain init --prefer-postgres
 ```
