@@ -1,0 +1,50 @@
+# Quadlet unit for hermes-agent.yaml: the Hermes Agent (Nous Research) gateway,
+# with its OpenAI-compatible API on 127.0.0.1:8642. Standalone: it neither
+# needs nor starts the gbrain units. Needs Podman >= 4.7 (AutoUpdate= in a
+# .kube unit); Debian 13 trixie qualifies.
+#
+# First create the secret, as the same user (root or not) that will run the
+# service. Like gbrain-postgres, kube play wants a Kubernetes Secret, not a
+# bare string:
+#
+#   read -rs API_SERVER_KEY      # e.g. the output of: openssl rand -hex 32
+#   printf 'apiVersion: v1\nkind: Secret\nmetadata:\n  name: hermes-agent\nstringData:\n  API_SERVER_KEY: "%s"\n' \
+#     "$API_SERVER_KEY" | podman secret create hermes-agent -
+#   unset API_SERVER_KEY
+#
+# The provider key is not part of the secret. Once the service runs, set it
+# (or change it) interactively; it lands in /opt/data/.env and the gateway
+# picks it up on the next turn:
+#
+#   podman exec -it hermes-agent hermes model
+#
+# Then put both files next to the gbrain units and start the service:
+#
+#   rootful:  /etc/containers/systemd/
+#             systemctl daemon-reload && systemctl start hermes-agent
+#             systemctl enable --now podman-auto-update.timer
+#
+#   rootless: ~/.config/containers/systemd/
+#             systemctl --user daemon-reload && systemctl --user start hermes-agent
+#             systemctl --user enable --now podman-auto-update.timer
+#             loginctl enable-linger $USER   # start at boot without a login
+#
+# Quadlet adds the network-online dependency itself (rootful or rootless), so
+# the [Unit] section does not declare one.
+[Unit]
+Description=Hermes Agent gateway (Nous Research)
+
+[Kube]
+Yaml=hermes-agent.yaml
+# podman-auto-update.timer pulls a newer :latest and restarts this unit,
+# rolling back to the previous image if the restart fails.
+AutoUpdate=registry
+
+[Service]
+Restart=always
+# The image is large (Playwright, Node, ffmpeg); the first pull can outlast
+# systemd's default 90 s start timeout.
+TimeoutStartSec=900
+
+[Install]
+WantedBy=default.target

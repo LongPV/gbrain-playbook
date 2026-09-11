@@ -1,0 +1,67 @@
+# Kubernetes YAML for `podman kube play` and the Quadlet unit hermes-agent.kube.
+# Podman names the container <pod>-<container>, so it runs as `hermes-agent`.
+#
+# Standalone: it does not use the gbrain pods. The pod keeps its own network
+# namespace, so the agent's terminal tool cannot reach services on the host's
+# loopback (Postgres on 5432, gbrain serve on 3131); only the API port below
+# is published.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hermes-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hermes
+  labels:
+    app: hermes
+spec:
+  restartPolicy: Always
+  containers:
+    - name: agent
+      # Moving tag: upstream CI retags :latest on every push to main.
+      # hermes-agent.kube sets AutoUpdate=registry, so podman-auto-update
+      # pulls it; the reference must stay fully qualified for that.
+      image: docker.io/nousresearch/hermes-agent:latest
+      # `args`, not `command`: the image ENTRYPOINT hands PID 1 to s6-overlay's
+      # /init, which must stay. In the s6 image `gateway run` starts the
+      # supervised gateway (seeding its state on a fresh volume) and then
+      # idles as a heartbeat.
+      args:
+        - gateway
+        - run
+      env:
+        - name: API_SERVER_ENABLED
+          value: "true"
+        # 0.0.0.0 inside the pod's own namespace; hostIP below is what keeps
+        # the port on host loopback.
+        - name: API_SERVER_HOST
+          value: 0.0.0.0
+      # Podman secret `hermes-agent`, created before the first start; see
+      # hermes-agent.kube. It carries only API_SERVER_KEY (16+ characters, or
+      # the API server refuses to start). Provider keys such as
+      # ANTHROPIC_API_KEY belong in /opt/data/.env, set any time with
+      # `hermes model`: Hermes loads .env over the process environment and
+      # re-reads it every turn, so a copy here would be shadowed anyway.
+      envFrom:
+        - secretRef:
+            name: hermes-agent
+      ports:
+        - containerPort: 8642
+          hostIP: 127.0.0.1
+          hostPort: 8642
+          protocol: TCP
+      volumeMounts:
+        - name: hermes-data
+          mountPath: /opt/data
+  volumes:
+    - name: hermes-data
+      persistentVolumeClaim:
+        claimName: hermes-data
