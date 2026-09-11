@@ -11,6 +11,9 @@ Environment="GBRAIN_ADMIN_BOOTSTRAP_TOKEN=your_secure_static_token_here"
 ExecStart=/root/.bun/bin/gbrain serve --http --port 3131 --bind 127.0.0.1 --public-url https://mcp.yourdomain.com
 Restart=always
 RestartSec=5
+RestartSteps=5
+RestartMaxDelaySec=30
+RestartRandomizedDelaySec=3
 
 [Install]
 WantedBy=default.target
