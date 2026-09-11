@@ -1,0 +1,16 @@
+[Unit]
+Description=GBrain HTTP Server
+After=network.target gbrain-postgres.service
+Requires=gbrain-postgres.service
+
+[Service]
+# Set any necessary environment variables, or use EnvironmentFile
+Environment="GBRAIN_ADMIN_BOOTSTRAP_TOKEN=your_secure_static_token_here"
+
+# Assuming installed via bun in the user's home directory
+ExecStart=/root/.bun/bin/gbrain serve --http --port 3131 --bind 127.0.0.1 --public-url https://mcp.yourdomain.com
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

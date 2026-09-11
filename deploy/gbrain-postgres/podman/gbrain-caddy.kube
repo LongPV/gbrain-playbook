@@ -1,0 +1,22 @@
+# Quadlet unit for gbrain-caddy.yaml. Needs Podman >= 4.4
+#
+# Before starting, make sure to create the required Podman secrets:
+#   podman secret create caddy-tls-pem cf.pem
+#   podman secret create caddy-tls-key cf.key
+#   podman secret create caddy-env caddy.env
+#
+# Quadlet adds the network-online dependency itself (rootful or rootless), so
+# the [Unit] section does not declare one.
+[Unit]
+Description=Caddy Reverse Proxy for GBrain
+Wants=gbrain-serve.service
+After=gbrain-serve.service
+
+[Kube]
+Yaml=gbrain-caddy.yaml
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

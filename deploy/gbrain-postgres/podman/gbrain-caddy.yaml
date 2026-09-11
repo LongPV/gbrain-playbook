@@ -1,0 +1,65 @@
+---
+# Caddyfile configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: caddy-config
+data:
+  Caddyfile: |
+    {$EXTERNAL_DOMAIN} {
+        tls /etc/caddy/certs/cf.pem /etc/caddy/certs/cf.key
+        
+        # Proxy to the application using the env var
+        reverse_proxy {$UPSTREAM_DESTINATION}
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gbrain-proxy
+  labels:
+    app: gbrain-proxy
+spec:
+  restartPolicy: Always
+  hostNetwork: true
+  containers:
+    - name: caddy
+      image: docker.io/caddy:2-alpine
+      command:
+        - caddy
+        - run
+        - --config
+        - /etc/caddy/Caddyfile
+        - --envfile
+        - /etc/caddy/.env
+        - --adapter
+        - caddyfile
+      volumeMounts:
+        - name: caddy-config-vol
+          mountPath: /etc/caddy/Caddyfile
+          subPath: Caddyfile
+        - name: caddy-env-vol
+          mountPath: /etc/caddy/.env
+          subPath: caddy-env
+          readOnly: true
+        - name: caddy-tls-pem-vol
+          mountPath: /etc/caddy/certs/cf.pem
+          subPath: caddy-tls-pem
+          readOnly: true
+        - name: caddy-tls-key-vol
+          mountPath: /etc/caddy/certs/cf.key
+          subPath: caddy-tls-key
+          readOnly: true
+  volumes:
+    - name: caddy-config-vol
+      configMap:
+        name: caddy-config
+    - name: caddy-env-vol
+      secret:
+        secretName: caddy-env
+    - name: caddy-tls-pem-vol
+      secret:
+        secretName: caddy-tls-pem
+    - name: caddy-tls-key-vol
+      secret:
+        secretName: caddy-tls-key
