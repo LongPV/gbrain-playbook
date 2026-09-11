@@ -1,4 +1,9 @@
-# Never run `gbrain upgrade`
+# Never run `gbrain upgrade` (deprecated)
+
+> **Deprecated as of gbrain v0.50.0.0 (2026-09-11). This rule is no longer
+> binding.** Agents may run `gbrain upgrade`. The text below is kept for
+> history. Why it was retired:
+> [Retiring the `gbrain upgrade` ban](../../gbrain/retiring-the-gbrain-upgrade-ban.md).
 
 **Do not execute `gbrain upgrade` — with any flags, in any directory — when
 working in this project or in the `~/gbrain` clone.**

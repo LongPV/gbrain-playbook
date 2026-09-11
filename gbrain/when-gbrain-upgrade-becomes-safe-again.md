@@ -1,5 +1,10 @@
 # When `gbrain upgrade` becomes safe again
 
+> **Superseded, 2026-09-11 (gbrain v0.50.0.0):** the rule this note carves an
+> exception out of is deprecated, and agents may now run `gbrain upgrade`, so
+> the section "The rule still stands — I run this, not an agent" no longer
+> holds. Why: [Retiring the `gbrain upgrade` ban](retiring-the-gbrain-upgrade-ban.md).
+
 I have a standing rule against running `gbrain upgrade` —
 [never run it](../.agents/rules/no-gbrain-upgrade.md) — and the reasoning
 behind it is in

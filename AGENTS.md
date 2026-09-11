@@ -23,4 +23,32 @@ about people, companies, decisions, projects, or past context:
 Project rules live in [`.agents/rules/`](.agents/rules/) and are binding. Read
 them before acting in this repo.
 
-- [Never run `gbrain upgrade`](.agents/rules/no-gbrain-upgrade.md)
+No rules are currently active.
+
+Deprecated, kept for history, not binding:
+
+- [Never run `gbrain upgrade`](.agents/rules/no-gbrain-upgrade.md) — retired at
+  gbrain v0.50.0.0 together with the
+  [`/upgrade-gbrain`](.claude/commands/upgrade-gbrain.md) command. Why:
+  [Retiring the `gbrain upgrade` ban](gbrain/retiring-the-gbrain-upgrade-ban.md).
+
+## Upgrading gbrain
+
+Agents may run `gbrain upgrade`. Do not use `/upgrade-gbrain`.
+
+Before running it, read the migration note for the version it will install:
+`skills/migrations/v<version>.md` in the incoming tree. To see that tree
+without pulling:
+
+```bash
+git -C ~/gbrain fetch && git -C ~/gbrain show @{u}:VERSION
+```
+
+```bash
+git -C ~/gbrain show @{u}:skills/migrations/v<version>.md
+```
+
+If a note calls for stopping services or an ordered cutover (v0.50.0.0 did),
+follow the note instead of running `gbrain upgrade`. On this install,
+`gbrain upgrade` pulls, runs `bun install` with its install scripts, and runs
+`post-upgrade` against whatever processes are live.

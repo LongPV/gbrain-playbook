@@ -1,5 +1,10 @@
 # Upgrading a source-linked CLI
 
+> **Update, 2026-09-11 (gbrain v0.50.0.0):** the rule and the slash command
+> this note describes are deprecated, and agents may now run `gbrain upgrade`.
+> Why: [Retiring the `gbrain upgrade` ban](retiring-the-gbrain-upgrade-ban.md).
+> The reasoning below is kept as written.
+
 I run gbrain from a clone rather than from a release. `~/.bun/bin/gbrain` is a
 `bun link` symlink into that clone, and it runs `src/cli.ts` directly under
 Bun — no build step, no binary, nothing to reissue. I set it up that way for

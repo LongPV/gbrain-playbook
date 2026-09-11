@@ -1,9 +1,16 @@
 ---
-description: Upgrade the source-linked gbrain CLI after you have pulled — bun install, apply migrations, then read the post-upgrade and migration notes
-allowed-tools: Bash(cd:*), Bash(gbrain:*), Bash(bun install:*), Bash(ls:*), Bash(cat:*), Bash(wc:*), Bash(sed:*), Bash(sort:*), Bash(printf:*), Read
+description: DEPRECATED since gbrain v0.50.0.0 — do not run; use `gbrain upgrade` instead
+allowed-tools: Read
 ---
 
-# Upgrade gbrain
+# Upgrade gbrain (deprecated)
+
+> **Deprecated as of gbrain v0.50.0.0 (2026-09-11). Stop here — do not execute
+> any step below.** Tell the user this command is retired, and point them to
+> [Retiring the `gbrain upgrade` ban](../../gbrain/retiring-the-gbrain-upgrade-ban.md).
+> Upgrade with `gbrain upgrade`, per [AGENTS.md](../../AGENTS.md). The text below
+> is kept for history. Its step 2 chain is what the v0.50.0.0 migration note
+> forbids running against live services.
 
 `gbrain` on this machine is installed **from source**: `~/.bun/bin/gbrain` is a
 `bun link` symlink into the clone at `~/gbrain`, which
