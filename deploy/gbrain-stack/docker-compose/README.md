@@ -13,7 +13,7 @@ docker compose up -d
 Or from the repository root:
 
 ```bash
-docker compose -f deploy/gbrain-postgres/docker-compose/docker-compose.yml up -d
+docker compose -f deploy/gbrain-stack/docker-compose/docker-compose.yml up -d
 ```
 
 ## Configuration
