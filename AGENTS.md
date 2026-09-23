@@ -52,3 +52,13 @@ If a note calls for stopping services or an ordered cutover (v0.50.0.0 did),
 follow the note instead of running `gbrain upgrade`. On this install,
 `gbrain upgrade` pulls, runs `bun install` with its install scripts, and runs
 `post-upgrade` against whatever processes are live.
+
+After upgrading, restart any gbrain process that started before the new
+code. The autopilot's job worker restarts with it:
+
+```bash
+launchctl kickstart -k gui/$(id -u)/com.gbrain.autopilot
+```
+
+The full sequence, with checks:
+[Upgrading gbrain from source, end to end](gbrain/upgrading-gbrain-from-source.md).

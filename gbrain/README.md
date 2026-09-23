@@ -13,6 +13,9 @@ day to day. One write-up per file.
 - [Retiring the `gbrain upgrade` ban](retiring-the-gbrain-upgrade-ban.md) — the
   v0.50.0.0 cutover broke the workaround's one-line upgrade, and the ban's own
   premise had already moved
+- [Upgrading gbrain from source, end to end](upgrading-gbrain-from-source.md) — the
+  commands, why a matching version can still hide pending migrations, and
+  restarting what's still running the old code
 - [A placeholder key is a routing decision](a-placeholder-key-is-a-routing-decision.md) — a
   fake API key typed to pass setup validation elects a provider you can't pay for
 - [Two files configure a brain repo](two-files-configure-a-brain-repo.md) — `gbrain.yml`
