@@ -1,10 +1,10 @@
 # Quadlet unit for gbrain-caddy.yaml. Needs Podman >= 4.4
 #
-# Before starting, make sure to create the required Podman secrets:
-#   podman secret create caddy-tls-pem cf.pem
-#   podman secret create caddy-tls-key cf.key
-#   podman secret create caddy-aop-ca aop-ca.pem
-#   podman secret create caddy-env caddy.env
+# Before starting, create the required Podman secrets: caddy-tls-pem (cf.pem),
+# caddy-tls-key (cf.key), caddy-aop-ca (aop-ca.pem) and caddy-env (caddy.env).
+# kube play only reads a secret that is a Kubernetes Secret, so each file must be
+# wrapped in one whose data key equals the secret name. See README.md, step 2
+# (the kube_secret helper); a plain `podman secret create NAME FILE` fails.
 #
 # Quadlet adds the network-online dependency itself (rootful or rootless), so
 # the [Unit] section does not declare one.

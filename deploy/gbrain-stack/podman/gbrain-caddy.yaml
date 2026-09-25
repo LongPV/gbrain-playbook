@@ -26,6 +26,8 @@ metadata:
     app: gbrain-proxy
 spec:
   restartPolicy: Always
+  # Share the host's network namespace: Caddy binds the host's 80/443 directly
+  # and reaches gbrain serve on its loopback-only 127.0.0.1:3131.
   hostNetwork: true
   containers:
     - name: caddy

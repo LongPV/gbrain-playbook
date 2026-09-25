@@ -48,12 +48,19 @@ The stack includes a Caddy reverse proxy. You must create Podman secrets for you
    # Ensure strict permissions on the key before importing
    chmod 600 cf.key
 
-   # Create the secrets in Podman
-   podman secret create caddy-tls-pem cf.pem
-   podman secret create caddy-tls-key cf.key
-   podman secret create caddy-aop-ca aop-ca.pem
-   podman secret create caddy-env caddy.env
+   # kube play only reads secrets that are Kubernetes Secrets (see 1A), so wrap
+   # each file in one. The data key must match the volumeMount's subPath, which
+   # gbrain-caddy.yaml sets to the secret's name.
+   kube_secret() {
+     printf 'apiVersion: v1\nkind: Secret\nmetadata:\n  name: %s\ndata:\n  %s: %s\n' \
+       "$1" "$1" "$(base64 -w0 "$2")" | podman secret create --replace "$1" -
+   }
+   kube_secret caddy-tls-pem cf.pem
+   kube_secret caddy-tls-key cf.key
+   kube_secret caddy-aop-ca aop-ca.pem
+   kube_secret caddy-env caddy.env
    ```
+   A plain `podman secret create caddy-aop-ca aop-ca.pem` stores the raw PEM, and the unit then fails to start with `cannot unmarshal string into Go value of type v1.Secret`.
    `aop-ca.pem` is the Cloudflare Authenticated Origin Pulls CA. Caddy rejects any client that doesn't present a certificate signed by it, so enable **Authenticated Origin Pulls** for the zone in Cloudflare, or every request will fail the TLS handshake.
    *Note: After importing into Podman, you can safely remove `cf.key` and `caddy.env` from the disk if you wish.*
 
