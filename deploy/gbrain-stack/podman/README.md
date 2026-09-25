@@ -51,8 +51,10 @@ The stack includes a Caddy reverse proxy. You must create Podman secrets for you
    # Create the secrets in Podman
    podman secret create caddy-tls-pem cf.pem
    podman secret create caddy-tls-key cf.key
+   podman secret create caddy-aop-ca aop-ca.pem
    podman secret create caddy-env caddy.env
    ```
+   `aop-ca.pem` is the Cloudflare Authenticated Origin Pulls CA. Caddy rejects any client that doesn't present a certificate signed by it, so enable **Authenticated Origin Pulls** for the zone in Cloudflare, or every request will fail the TLS handshake.
    *Note: After importing into Podman, you can safely remove `cf.key` and `caddy.env` from the disk if you wish.*
 
 To verify the secrets were created:

@@ -3,6 +3,7 @@
 # Before starting, make sure to create the required Podman secrets:
 #   podman secret create caddy-tls-pem cf.pem
 #   podman secret create caddy-tls-key cf.key
+#   podman secret create caddy-aop-ca aop-ca.pem
 #   podman secret create caddy-env caddy.env
 #
 # Quadlet adds the network-online dependency itself (rootful or rootless), so

@@ -7,7 +7,12 @@ metadata:
 data:
   Caddyfile: |
     {$EXTERNAL_DOMAIN} {
-        tls /etc/caddy/certs/cf.pem /etc/caddy/certs/cf.key
+        tls /etc/caddy/certs/cf.pem /etc/caddy/certs/cf.key {
+            client_auth {
+                mode require_and_verify
+                trust_pool file /etc/caddy/certs/aop-ca.pem
+            }
+        }
         
         # Proxy to the application using the env var
         reverse_proxy {$UPSTREAM_DESTINATION}
@@ -50,6 +55,10 @@ spec:
           mountPath: /etc/caddy/certs/cf.key
           subPath: caddy-tls-key
           readOnly: true
+        - name: caddy-aop-ca-vol
+          mountPath: /etc/caddy/certs/aop-ca.pem
+          subPath: caddy-aop-ca
+          readOnly: true
   volumes:
     - name: caddy-config-vol
       configMap:
@@ -63,3 +72,6 @@ spec:
     - name: caddy-tls-key-vol
       secret:
         secretName: caddy-tls-key
+    - name: caddy-aop-ca-vol
+      secret:
+        secretName: caddy-aop-ca
